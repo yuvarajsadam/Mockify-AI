@@ -1,0 +1,10 @@
+flask
+flask_cors
+python-dotenv
+langchain
+langchain-community
+langgraph
+assemblyai
+requests
+pypdf
+python-docx

@@ -1,310 +1,1476 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Interview Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                        'space': ['Space Grotesk', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+    <title>Mockify AI — Interview Practice</title>
+    <meta name="description" content="Practice job interviews with AI. Get personalized questions based on your resume and job description, with real-time voice interaction and detailed feedback.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary: #7c6af7;
+            --primary-dark: #5f4de0;
+            --secondary: #a78bfa;
+            --accent: #f472b6;
+            --bg: #050508;
+            --surface: #0d0d14;
+            --surface2: #13131e;
+            --surface3: #1a1a2a;
+            --border: rgba(124, 106, 247, 0.15);
+            --border2: rgba(255,255,255,0.06);
+            --text: #f0efff;
+            --text-muted: #8b8aaa;
+            --text-dim: #55546e;
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
             font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .subject-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
-            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+
+        /* === LAYOUT === */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
         }
 
-        .subject-btn:hover:not(.active) {
-            transform: translateX(4px);
+        /* === SIDEBAR === */
+        .sidebar {
+            width: 260px;
+            flex-shrink: 0;
+            background: var(--surface);
+            border-right: 1px solid var(--border2);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 10;
         }
 
-        .recording-active {
-            animation: pulse 1.5s infinite;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 36px;
         }
 
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5);
-            }
-            70% {
-                box-shadow: 0 0 0 20px rgba(239, 68, 68, 0);
-            }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 4px 20px rgba(124, 106, 247, 0.35);
         }
 
-        .hidden {
-            display: none !important;
-        }
-
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .gradient-heading {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .sidebar-section {
+            margin-bottom: 28px;
+        }
+
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        .how-it-works {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .how-it-works li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .sidebar-note {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 11px;
+            color: #fbbf24;
+            line-height: 1.5;
+        }
+
+        .sidebar-note i { margin-right: 5px; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 11px;
+            color: var(--text-dim);
+        }
+
+        .sidebar-footer a {
+            color: var(--secondary);
+            text-decoration: none;
+        }
+
+        /* === MAIN === */
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* === TOPBAR === */
+        .topbar {
+            padding: 20px 36px;
+            border-bottom: 1px solid var(--border2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(5, 5, 8, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .topbar-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .glow-border {
-            box-shadow: 0 0 30px rgba(102, 126, 234, 0.2);
+        .interview-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(124, 106, 247, 0.12);
+            border: 1px solid rgba(124, 106, 247, 0.25);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--secondary);
         }
 
-        .sidebar-gradient {
-            background: linear-gradient(180deg, #0a0a0a 0%, #000000 100%);
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        /* === PAGE SECTIONS === */
+        .page-section {
+            flex: 1;
+            padding: 36px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ==================== SETUP SCREEN ==================== */
+        .setup-container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .setup-hero {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .setup-hero .hero-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 20px;
+            box-shadow: 0 8px 32px rgba(124, 106, 247, 0.3);
+        }
+
+        .setup-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .setup-hero p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        .setup-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .dropzone {
+            border: 2px dashed rgba(124, 106, 247, 0.3);
+            border-radius: 14px;
+            padding: 28px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(124, 106, 247, 0.04);
+        }
+
+        .dropzone:hover {
+            border-color: var(--primary);
+            background: rgba(124, 106, 247, 0.08);
+        }
+
+        .dropzone.drag-over {
+            border-color: var(--primary);
+            background: rgba(124, 106, 247, 0.12);
+        }
+
+        .dropzone-icon {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .dropzone p { font-size: 13px; color: var(--text-muted); }
+        .dropzone span { color: var(--primary); font-weight: 600; }
+        .dropzone small { font-size: 11px; color: var(--text-dim); display: block; margin-top: 4px; }
+
+        .file-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(124, 106, 247, 0.08);
+            border: 1px solid rgba(124, 106, 247, 0.25);
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        .file-banner-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+        }
+
+        .file-banner-info i { font-size: 18px; flex-shrink: 0; }
+        .file-banner-info span { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .btn-remove { background: none; border: none; color: var(--text-dim); cursor: pointer; padding: 4px 8px; font-size: 14px; transition: color 0.2s; }
+        .btn-remove:hover { color: var(--error); }
+
+        .jd-textarea {
+            width: 100%;
+            min-height: 130px;
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+            line-height: 1.6;
+        }
+
+        .jd-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124, 106, 247, 0.1); }
+        .jd-textarea::placeholder { color: var(--text-dim); }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(124, 106, 247, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(124, 106, 247, 0.45);
+        }
+
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .setup-status {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: 12px;
+        }
+
+        .setup-status.ready { color: var(--success); }
+
+        /* ==================== INTERVIEW SCREEN ==================== */
+        .interview-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 24px;
+            height: calc(100vh - 85px);
+            max-height: calc(100vh - 85px);
+        }
+
+        /* --- Left Panel: AI Avatar --- */
+        .ai-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .interviewer-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+        }
+
+        .avatar-img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid transparent;
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            background-image: linear-gradient(var(--surface2), var(--surface2)), 
+                              linear-gradient(135deg, var(--primary), var(--accent));
+        }
+
+        .speaking-ring {
+            position: absolute;
+            inset: -5px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .speaking-ring.active {
+            border-color: var(--primary);
+            opacity: 1;
+            animation: speaking-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes speaking-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(124, 106, 247, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(124, 106, 247, 0); }
+        }
+
+        .interviewer-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .interviewer-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .ai-status-badge {
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid;
+            transition: all 0.3s ease;
+        }
+
+        .ai-status-badge.idle {
+            background: rgba(55, 55, 80, 0.4);
+            border-color: var(--border2);
+            color: var(--text-dim);
+        }
+
+        .ai-status-badge.speaking {
+            background: rgba(124, 106, 247, 0.12);
+            border-color: rgba(124, 106, 247, 0.4);
+            color: var(--secondary);
+        }
+
+        .ai-status-badge.listening {
+            background: rgba(52, 211, 153, 0.1);
+            border-color: rgba(52, 211, 153, 0.4);
+            color: var(--success);
+        }
+
+        /* Current Question Box */
+        .current-question-box {
+            background: var(--surface2);
+            border: 1px solid rgba(124, 106, 247, 0.2);
+            border-radius: 16px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .current-question-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .current-question-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+        }
+
+        .current-question-text {
+            font-size: 13px;
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 60px;
+        }
+
+        /* Progress */
+        .progress-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-label { font-size: 12px; color: var(--text-muted); }
+        .progress-count { font-size: 13px; font-weight: 700; color: var(--text); }
+
+        .progress-bar-bg {
+            height: 5px;
+            background: var(--surface3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+            width: 10%;
+        }
+
+        /* --- Right Panel: Chat + Controls --- */
+        .chat-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: visible; /* allow inner scrolling */
+            flex: 1;
+        }
+
+        /* Chat transcript */
+        .chat-transcript {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-empty {
+            margin: auto;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 13px;
+        }
+
+        .chat-empty i { font-size: 32px; margin-bottom: 12px; display: block; }
+
+        .chat-message {
+            display: flex;
+            gap: 12px;
+            animation: msg-in 0.3s ease;
+        }
+
+        @keyframes msg-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-message.user-msg { flex-direction: row-reverse; }
+
+        .chat-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .chat-avatar.ai-avatar {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            overflow: hidden;
+        }
+
+        .chat-avatar.ai-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+        .chat-avatar.user-avatar {
+            background: linear-gradient(135deg, #4ade80, #22d3ee);
+            color: #050508;
+            font-size: 13px;
+        }
+
+        .chat-bubble {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 13.5px;
+            line-height: 1.6;
+        }
+
+        .ai-bubble {
+            background: var(--surface3);
+            border: 1px solid rgba(124, 106, 247, 0.15);
+            color: var(--text);
+            border-top-left-radius: 4px;
+        }
+
+        .user-bubble {
+            background: linear-gradient(135deg, rgba(124, 106, 247, 0.2), rgba(167, 139, 250, 0.15));
+            border: 1px solid rgba(124, 106, 247, 0.25);
+            color: var(--text);
+            text-align: right;
+            border-top-right-radius: 4px;
+        }
+
+        .chat-meta {
+            font-size: 10px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .user-msg .chat-meta { text-align: right; }
+
+        /* Typing indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 14px;
+            background: var(--surface3);
+            border: 1px solid rgba(124, 106, 247, 0.15);
+            border-radius: 16px;
+            border-top-left-radius: 4px;
+            width: fit-content;
+        }
+
+        .typing-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--secondary);
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; background: var(--primary); }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; background: var(--accent); }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+
+        /* Controls */
+        .controls-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 20px 24px;
+        }
+
+        .controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .recording-status {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recording-status.recording-active-text { color: var(--error); }
+        .recording-status.listening-text { color: var(--secondary); }
+        .recording-status.ready-text { color: var(--success); }
+
+        .recording-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .recording-indicator.blink { animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+        .btn-record {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid rgba(124, 106, 247, 0.3);
+            background: var(--surface3);
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .btn-record:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(124, 106, 247, 0.08);
+            transform: scale(1.05);
+        }
+
+        .btn-record.recording {
+            border-color: var(--error);
+            background: rgba(248, 113, 113, 0.1);
+            color: var(--error);
+            animation: record-pulse 1.5s infinite;
+        }
+
+        @keyframes record-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(248, 113, 113, 0); }
+        }
+
+        .btn-record:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+        .btn-submit {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124, 106, 247, 0.35); }
+        .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .btn-end {
+            padding: 10px 16px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-end:hover:not(:disabled) { border-color: rgba(248, 113, 113, 0.4); color: var(--error); }
+        .btn-end:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        /* Error Toast */
+        .error-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(30, 20, 40, 0.95);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            border-radius: 14px;
+            padding: 16px 20px;
+            max-width: 340px;
+            z-index: 100;
+            animation: toast-in 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+
+        @keyframes toast-in {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .error-toast-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--error);
+            margin-bottom: 6px;
+        }
+
+        .error-toast-body { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+        .error-toast-retry {
+            margin-top: 10px;
+            padding: 6px 14px;
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            border-radius: 8px;
+            color: var(--error);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .error-toast-retry:hover { background: rgba(248, 113, 113, 0.2); }
+
+        /* === FEEDBACK SECTION === */
+        .feedback-overlay {
+            background: var(--surface);
+            border-top: 1px solid var(--border2);
+            padding: 28px;
+            overflow-y: auto;
+        }
+
+        .feedback-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .feedback-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feedback-subtitle { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .score-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .score-ring svg { transform: rotate(-90deg); }
+        .score-ring-text {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .score-number {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .score-denom { font-size: 10px; color: var(--text-muted); }
+
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .feedback-card {
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feedback-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .feedback-card.strengths::before { background: linear-gradient(90deg, #34d399, #059669); }
+        .feedback-card.improvements::before { background: linear-gradient(90deg, #fbbf24, #d97706); }
+
+        .feedback-card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .feedback-card.strengths .feedback-card-title { color: var(--success); }
+        .feedback-card.improvements .feedback-card-title { color: var(--warning); }
+
+        .feedback-card-text {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .btn-get-feedback {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 24px rgba(124, 106, 247, 0.3);
+        }
+
+        .btn-get-feedback:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(124, 106, 247, 0.45); }
+        .btn-get-feedback:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-new-interview {
+            padding: 12px 28px;
+            background: var(--surface3);
+            color: var(--text-muted);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .btn-new-interview:hover { border-color: var(--primary); color: var(--secondary); }
+
+        .generating-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* === QUOTA BANNER === */
+        .quota-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(5, 5, 8, 0.88);
+            backdrop-filter: blur(14px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: overlay-in 0.35s ease;
+        }
+
+        @keyframes overlay-in {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        .quota-card {
+            background: var(--surface2);
+            border: 1px solid rgba(251, 191, 36, 0.35);
+            border-radius: 24px;
+            padding: 40px 44px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(251,191,36,0.12);
+            animation: card-in 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        @keyframes card-in {
+            from { transform: scale(0.88) translateY(20px); opacity: 0; }
+            to   { transform: scale(1)   translateY(0);    opacity: 1; }
+        }
+
+        .quota-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(251, 191, 36, 0.1);
+            border: 2px solid rgba(251, 191, 36, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 20px;
+            animation: icon-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes icon-pulse {
+            0%, 100% { box-shadow: 0 0 0 0   rgba(251,191,36,0.3); }
+            50%       { box-shadow: 0 0 0 14px rgba(251,191,36,0); }
+        }
+
+        .quota-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+
+        .quota-desc {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 24px;
+        }
+
+        .quota-countdown-wrap {
+            background: rgba(251, 191, 36, 0.07);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 14px;
+            padding: 18px 24px;
+            margin-bottom: 24px;
+        }
+
+        .quota-countdown-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+            color: #fbbf24;
+            margin-bottom: 8px;
+        }
+
+        .quota-countdown-timer {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: 2px;
+        }
+
+        .quota-progress-bg {
+            height: 4px;
+            background: rgba(251,191,36,0.12);
+            border-radius: 2px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .quota-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+
+        .quota-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn-quota-retry {
+            padding: 11px 24px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #050508;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .btn-quota-retry:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+        .btn-quota-retry:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+        .btn-quota-dismiss {
+            padding: 11px 20px;
+            background: transparent;
+            color: var(--text-dim);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-quota-dismiss:hover { border-color: var(--text-dim); color: var(--text-muted); }
+
+        /* Inline quota warning bar in chat */
+        .quota-inline-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 12px;
+            font-size: 12.5px;
+            color: #fbbf24;
+            animation: msg-in 0.3s ease;
+        }
+
+        .quota-inline-bar i { font-size: 16px; flex-shrink: 0; }
+        .quota-inline-bar span { line-height: 1.5; }
+        .quota-inline-bar strong { color: #fff; }
+
+        /* === Responsive === */
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .interview-layout { grid-template-columns: 1fr; }
+            .ai-panel { display: none; }
+            .feedback-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .page-section { padding: 16px; }
+            .topbar { padding: 16px 20px; }
+            .quota-card { padding: 28px 20px; }
         }
     </style>
 </head>
+<body>
 
-<body class="bg-black min-h-screen text-white font-inter">
+<div class="app-layout">
 
-    <div class="min-h-screen flex flex-col lg:flex-row">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">🤖</div>
+            <span class="logo-text">Mockify AI</span>
+        </div>
 
-        <!-- Sidebar - 1/5 width on large screens -->
-        <aside class="w-full lg:w-1/5 sidebar-gradient border-b lg:border-b-0 lg:border-r border-zinc-800/50 p-4 lg:p-6 flex flex-col">
-            
-            <!-- Logo -->
-            <div class="flex items-center gap-3 mb-8">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#667eea] to-[#764ba2] rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                    <i class="fas fa-robot text-white text-xl"></i>
-                </div>
-                <span class="font-space font-bold text-2xl tracking-tight gradient-heading">AI Interview</span>
+        <div class="sidebar-section">
+            <p class="sidebar-label">How It Works</p>
+            <ul class="how-it-works">
+                <li>
+                    <span class="step-num">1</span>
+                    <span>Upload your resume (PDF, DOCX, or TXT)</span>
+                </li>
+                <li>
+                    <span class="step-num">2</span>
+                    <span>Paste the Job Description or target role title</span>
+                </li>
+                <li>
+                    <span class="step-num">3</span>
+                    <span>Natalie starts with a self-intro question and asks 8-10 JD-focused questions</span>
+                </li>
+                <li>
+                    <span class="step-num">4</span>
+                    <span>Get detailed AI feedback mapped to the JD requirements</span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-note">
+                <i class="fas fa-lightbulb"></i>
+                <strong>Tip:</strong> Paste the full JD for the most relevant questions. The more detail, the better Natalie can tailor the interview to the role.
             </div>
+        </div>
 
-            <!-- Topic Label -->
-            <h3 class="text-gray-400 text-xs font-semibold uppercase tracking-widest mb-3">Select Topic</h3>
+        <div class="sidebar-footer">
+            Powered by Gemini + AssemblyAI + Murf
+        </div>
+    </aside>
 
-            <!-- Subject Buttons -->
-            <div class="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible pb-2 lg:pb-0">
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="Self Introduction">
-                    <div class="w-9 h-9 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-user text-blue-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">Self Introduction</span>
-                </button>
+    <!-- Main Content -->
+    <main class="main-content">
 
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="Generative AI">
-                    <div class="w-9 h-9 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-brain text-purple-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">Generative AI</span>
-                </button>
-
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="Python">
-                    <div class="w-9 h-9 bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fab fa-python text-yellow-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">Python</span>
-                </button>
-
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="English">
-                    <div class="w-9 h-9 bg-green-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-language text-green-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">English</span>
-                </button>
-
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="HTML">
-                    <div class="w-9 h-9 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fab fa-html5 text-orange-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">HTML</span>
-                </button>
-
-                <button class="subject-btn flex items-center gap-3 bg-zinc-900/30 hover:bg-zinc-800/50 border border-zinc-700/50 hover:border-zinc-500 rounded-xl p-3 transition-all duration-300 text-left whitespace-nowrap flex-shrink-0" data-subject="CSS">
-                    <div class="w-9 h-9 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                        <i class="fab fa-css3-alt text-blue-400"></i>
-                    </div>
-                    <span class="font-medium text-sm text-white">CSS</span>
-                </button>
+        <!-- Top Bar -->
+        <div class="topbar">
+            <span class="topbar-title" id="topbarTitle">Practice Interview</span>
+            <div id="interviewBadge" class="interview-badge hidden">
+                <div class="live-dot"></div>
+                <span id="badgeText">Live Interview</span>
             </div>
+        </div>
 
-            <!-- Footer -->
-            <div class="mt-auto pt-6 hidden lg:block">
-                <p class="text-zinc-500 text-xs">Powered by AI</p>
-            </div>
-        </aside>
+        <!-- Page Content -->
+        <div class="page-section" id="pageContent">
 
-        <!-- Main Content - 4/5 width on large screens -->
-        <main class="flex-1 lg:w-4/5 flex flex-col bg-black">
-            
-            <!-- Header - Centered -->
-            <header class="px-4 lg:px-8 py-6 lg:py-8 border-b border-zinc-800/50">
-                <div class="text-center max-w-3xl mx-auto">
-                    <h1 class="font-space font-bold text-3xl lg:text-5xl xl:text-6xl tracking-tight mb-3">
-                        <span class="gradient-text">Master Your Interview</span>
-                    </h1>
-                    <p class="text-gray-300 text-base lg:text-lg font-light">Ace Your Technical Interviews with AI-Powered Practice and Feedback</p>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <div class="flex-1 p-4 lg:p-8 overflow-y-auto">
-
-                <!-- Welcome Screen -->
-                <div id="welcomeState" class="h-full flex flex-col items-center justify-center text-center py-8">
-                    <div class="w-28 h-28 lg:w-36 lg:h-36 bg-gradient-to-br from-zinc-800/50 to-zinc-900/50 rounded-full flex items-center justify-center mb-6 border border-zinc-700/30 glow-border">
-                        <i class="fas fa-microphone text-4xl lg:text-5xl text-zinc-400"></i>
-                    </div>
-                    <h2 class="font-space text-2xl lg:text-3xl font-bold gradient-heading mb-3">Ready to Practice?</h2>
-                    <p class="text-gray-400 text-base lg:text-lg">Select a topic from the sidebar to begin</p>
+            <!-- ========== SETUP SCREEN ========== -->
+            <div id="setupScreen" class="setup-container">
+                <div class="setup-hero">
+                    <div class="hero-icon">🎯</div>
+                    <h1>Start Your Mock Interview</h1>
+                    <p>Upload your resume and paste the job description. Natalie will conduct a focused interview based on the role.</p>
                 </div>
 
-                <!-- Interview Screen -->
-                <div id="interviewState" class="hidden">
-                    
-                    <!-- Subject Badge and Question Counter -->
-                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-                        <div class="flex items-center gap-3">
-                            <span id="subjectBadge" class="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-5 py-2 rounded-full font-semibold shadow-lg">Python</span>
-                            <i id="subjectIcon" class="fab fa-python text-2xl text-yellow-400"></i>
+                <div class="setup-card">
+                    <!-- Resume Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Resume (Required)</label>
+                        <input type="file" id="resumeInput" accept=".pdf,.docx,.txt" class="hidden">
+                        <div id="dropZone" class="dropzone">
+                            <div class="dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                            <p>Drag & drop your resume, or <span>browse</span></p>
+                            <small>Supports PDF, DOCX, TXT</small>
                         </div>
-                        <span class="text-gray-300 text-base font-medium">Question <span id="questionNum" class="text-white font-bold text-lg">1</span>/5</span>
-                    </div>
-
-                    <!-- Profile Image - Larger size -->
-                    <div class="flex flex-col items-center mb-6">
-                        <div class="w-44 h-44 lg:w-56 lg:h-56 xl:w-64 xl:h-64 rounded-full overflow-hidden border-4 border-zinc-700/50 mb-4 shadow-2xl">
-                            <img src="https://www.whiteroomstudio.com.sg/wordpress/wp-content/uploads/2021/10/professional-headshot-photography-linkedin-singapore-5.jpeg" alt="Natalie" class="w-full h-full object-cover">
-                        </div>
-                        <p class="text-gray-300 text-lg lg:text-xl font-medium">Natalie</p>
-                    </div>
-
-                    <!-- Speaking Bubble -->
-                    <div class="max-w-2xl mx-auto mb-6">
-                        <div id="speakingBubble" class="hidden flex justify-center items-center gap-3 p-5 bg-zinc-900/50 rounded-2xl border border-zinc-800/50">
-                            <div class="flex gap-2">
-                                <div class="w-3 h-3 bg-[#667eea] rounded-full animate-bounce" style="animation-delay: 0s;"></div>
-                                <div class="w-3 h-3 bg-[#764ba2] rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
-                                <div class="w-3 h-3 bg-[#f093fb] rounded-full animate-bounce" style="animation-delay: 0.4s;"></div>
+                        <div id="fileBanner" class="file-banner hidden">
+                            <div class="file-banner-info">
+                                <i id="fileIcon" class="fas fa-file-pdf" style="color:#f87171;"></i>
+                                <span id="fileName">resume.pdf</span>
                             </div>
-                            <span class="text-gray-200 ml-2 font-medium">Pranathi is speaking...</span>
+                            <button class="btn-remove" id="removeFileBtn"><i class="fas fa-times"></i></button>
                         </div>
                     </div>
 
-                    <!-- Recording Controls -->
-                    <div class="flex flex-col items-center gap-4 mb-6">
-                        <!-- Start Interview Button / Record Button -->
-                        <button id="startInterviewBtn" class="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-8 py-3 rounded-full font-bold text-base hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300">
-                            Start Interview
-                        </button>
-                        
-                        <button id="recordBtn" disabled class="hidden w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-zinc-800/80 text-gray-300 flex items-center justify-center transition-all duration-300 border-2 border-zinc-700/50 hover:border-zinc-500">
-                            <i id="micIcon" class="fas fa-microphone text-2xl lg:text-3xl"></i>
-                            <i id="stopIcon" class="fas fa-stop text-2xl lg:text-3xl hidden"></i>
-                        </button>
-                        <p id="recordingStatus" class="text-gray-400 text-base">Click Start Interview to begin</p>
-
-                        <button id="submitBtn" disabled class="hidden bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-8 py-3 rounded-full font-bold text-base hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300">
-                            Submit Answer
-                        </button>
+                    <!-- Job Description -->
+                    <div class="form-group">
+                        <label class="form-label">Job Description / Target Role (Recommended)</label>
+                        <textarea id="jdInput" class="jd-textarea" placeholder="Paste the job description here, or enter a job title like 'Senior Python Developer at a fintech startup'..."></textarea>
                     </div>
 
-                    <!-- End Interview Button -->
-                    <div class="text-center">
-                        <button id="endInterviewBtn" disabled class="border-2 border-zinc-700 text-gray-300 px-6 py-2.5 rounded-xl transition-all duration-300 hover:border-red-500/50 hover:text-red-400 font-medium text-sm">
-                            End Interview
-                        </button>
-                    </div>
+                    <!-- Start Button -->
+                    <button id="startBtn" class="btn-primary" disabled>
+                        <i class="fas fa-play"></i> Start Practice Interview
+                    </button>
+                    <p class="setup-status" id="setupStatus">Upload a resume to unlock the interview</p>
+                </div>
+            </div>
 
-                    <!-- Feedback Section -->
-                    <div id="feedbackSection" class="hidden mt-10 pt-6 border-t border-zinc-800/50">
-                        
-                        <!-- Get Feedback Button -->
-                        <div id="getFeedbackArea" class="text-center mb-6">
-                            <p class="text-gray-300 mb-4 text-base">Interview completed!</p>
-                            <button id="getFeedbackBtn" class="bg-gradient-to-r from-[#667eea] via-[#764ba2] to-[#f093fb] text-white px-8 py-3 rounded-full font-bold text-base hover:opacity-90 transition-all duration-300 shadow-lg shadow-purple-500/30">
-                                Get Feedback
-                            </button>
+            <!-- ========== INTERVIEW SCREEN ========== -->
+            <div id="interviewScreen" class="hidden" style="height: calc(100vh - 120px); display: flex; flex-direction: column;">
+
+                <!-- Interview Layout -->
+                <div class="interview-layout" style="flex:1; overflow:hidden;">
+
+                    <!-- Left: AI Panel -->
+                    <div class="ai-panel">
+                        <!-- Interviewer Card -->
+                        <div class="interviewer-card">
+                            <div class="avatar-wrapper">
+                                <img 
+                                    class="avatar-img"
+                                    src="https://www.whiteroomstudio.com.sg/wordpress/wp-content/uploads/2021/10/professional-headshot-photography-linkedin-singapore-5.jpeg" 
+                                    alt="Natalie - AI Interviewer"
+                                >
+                                <div class="speaking-ring" id="speakingRing"></div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div class="interviewer-name">Natalie</div>
+                                <div class="interviewer-role">AI Interviewer</div>
+                            </div>
+                            <div class="ai-status-badge idle" id="aiStatusBadge">Idle</div>
                         </div>
 
-                        <!-- Feedback Content -->
-                        <div id="feedbackContent" class="hidden max-w-xl mx-auto">
-                            
-                            <!-- Feedback Header -->
-                            <div class="flex flex-col sm:flex-row justify-between items-start gap-6 mb-6">
-                                <div>
-                                    <p class="text-gray-400 text-xs mb-1 uppercase tracking-wider">Detailed Feedback</p>
-                                    <h3 id="feedbackSubject" class="font-space text-2xl font-bold gradient-heading">Subject</h3>
-                                </div>
-                                <div class="text-center">
-                                    <div class="relative w-24 h-24">
-                                        <svg class="w-24 h-24 transform -rotate-90">
-                                            <circle cx="48" cy="48" r="40" stroke="#27272a" stroke-width="5" fill="none" />
-                                            <circle id="scoreCircle" cx="48" cy="48" r="40" stroke="url(#scoreGradient)" stroke-width="5" fill="none" stroke-dasharray="251.2" stroke-dashoffset="251.2" stroke-linecap="round" class="transition-all duration-1000" />
-                                            <defs>
-                                                <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                    <stop offset="0%" stop-color="#667eea" />
-                                                    <stop offset="100%" stop-color="#764ba2" />
-                                                </linearGradient>
-                                            </defs>
-                                        </svg>
-                                        <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                            <span id="scoreValue" class="text-2xl font-bold text-white">0</span>
-                                            <span class="text-xs text-gray-400">/5</span>
-                                        </div>
-                                    </div>
-                                    <p class="text-xs text-gray-400 mt-1">Score</p>
-                                </div>
+                        <!-- Current Question -->
+                        <div class="current-question-box">
+                            <div class="current-question-header">
+                                <i class="fas fa-comment-dots"></i>
+                                Natalie is asking
                             </div>
-
-                            <!-- Feedback Cards -->
-                            <div class="space-y-4">
-                                <div class="bg-zinc-900/30 rounded-xl p-5 border border-zinc-800/50">
-                                    <h4 class="text-lg font-bold mb-2 flex items-center gap-2 gradient-heading">
-                                        <i class="fas fa-star text-yellow-400"></i>
-                                        Feedback
-                                    </h4>
-                                    <p id="feedbackText" class="text-gray-200 leading-relaxed text-sm"></p>
-                                </div>
-                                <div class="bg-zinc-900/30 rounded-xl p-5 border border-zinc-800/50">
-                                    <h4 class="text-lg font-bold mb-2 flex items-center gap-2 gradient-heading">
-                                        <i class="fas fa-chart-line text-cyan-400"></i>
-                                        Areas of Improvement
-                                    </h4>
-                                    <p id="improvementText" class="text-gray-200 leading-relaxed text-sm"></p>
-                                </div>
+                            <div class="current-question-text" id="currentQuestionText">
+                                <span style="color: var(--text-dim);">Waiting to begin...</span>
                             </div>
+                        </div>
 
-                            <!-- New Interview Button - Smaller width -->
-                            <div class="text-center mt-8">
-                                <button id="newInterviewBtn" class="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white px-10 py-3 rounded-xl font-bold text-base hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300">
-                                    Start New Interview
+                        <!-- Progress -->
+                        <div class="progress-card">
+                            <div class="progress-header">
+                                <span class="progress-label">Interview Progress</span>
+                                <span class="progress-count">Q <span id="questionNumDisplay">1</span> of 8–10</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Chat Panel -->
+                    <div class="chat-panel">
+                        <!-- Transcript -->
+                        <div class="chat-transcript" id="chatTranscript">
+                            <div class="chat-empty" id="chatEmpty">
+                                <i class="fas fa-comments"></i>
+                                <p>The conversation will appear here</p>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="controls-card">
+                            <div class="controls-row">
+                                <div class="recording-status" id="recordingStatusEl">
+                                    <div class="recording-indicator"></div>
+                                    <span id="recordingStatusText">Waiting...</span>
+                                </div>
+
+                                <button class="btn-record" id="recordBtn" disabled title="Start/Stop Recording">
+                                    <i id="micIcon" class="fas fa-microphone"></i>
+                                    <i id="stopIcon" class="fas fa-stop hidden"></i>
+                                </button>
+
+                                <button class="btn-submit hidden" id="submitBtn">
+                                    <i class="fas fa-paper-plane"></i> Submit
+                                </button>
+
+                                <button class="btn-end" id="endBtn" disabled>
+                                    <i class="fas fa-flag-checkered"></i> End
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Feedback Section (shown when interview ends) -->
+                <div id="feedbackSection" class="hidden feedback-overlay">
+                    <!-- Get Feedback Button -->
+                    <div id="getFeedbackArea">
+                        <p style="text-align:center; color: var(--text-muted); margin-bottom: 16px; font-size:14px;">
+                            <i class="fas fa-check-circle" style="color: var(--success); margin-right: 6px;"></i>
+                            Interview complete! Get your personalized feedback below.
+                        </p>
+                        <button class="btn-get-feedback" id="getFeedbackBtn">
+                            <i class="fas fa-chart-bar" style="margin-right: 8px;"></i> Generate Feedback
+                        </button>
+                    </div>
+
+                    <!-- Feedback Content -->
+                    <div id="feedbackContent" class="hidden">
+                        <div class="feedback-header">
+                            <div>
+                                <div class="feedback-title">Your Interview Feedback</div>
+                                <div class="feedback-subtitle" id="feedbackRoleLabel">Practice Interview</div>
+                            </div>
+                            <div class="score-display">
+                                <div class="score-ring">
+                                    <svg width="80" height="80" viewBox="0 0 80 80">
+                                        <circle cx="40" cy="40" r="32" stroke="#1a1a2a" stroke-width="6" fill="none"/>
+                                        <circle id="scoreCircle" cx="40" cy="40" r="32" 
+                                            stroke="url(#sg)" stroke-width="6" fill="none"
+                                            stroke-dasharray="201" stroke-dashoffset="201"
+                                            stroke-linecap="round"
+                                            style="transition: stroke-dashoffset 1s ease;"/>
+                                        <defs>
+                                            <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#7c6af7"/>
+                                                <stop offset="100%" stop-color="#f472b6"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    <div class="score-ring-text">
+                                        <span class="score-number" id="scoreValue">–</span>
+                                        <span class="score-denom">/5</span>
+                                    </div>
+                                </div>
+                                <span style="font-size:11px; color:var(--text-dim);">Score</span>
+                            </div>
+                        </div>
+
+                        <div class="feedback-grid">
+                            <div class="feedback-card strengths">
+                                <div class="feedback-card-title">
+                                    <i class="fas fa-star"></i> Strengths
+                                </div>
+                                <p class="feedback-card-text" id="feedbackText">–</p>
+                            </div>
+                            <div class="feedback-card improvements">
+                                <div class="feedback-card-title">
+                                    <i class="fas fa-chart-line"></i> Areas to Improve
+                                </div>
+                                <p class="feedback-card-text" id="improvementText">–</p>
+                            </div>
+                        </div>
+
+                        <div style="text-align:center;">
+                            <button class="btn-new-interview" id="newInterviewBtn">
+                                <i class="fas fa-redo" style="margin-right:6px;"></i> Start New Interview
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </main>
+
+        </div>
+    </main>
+</div>
+
+<!-- ========== QUOTA EXHAUSTED OVERLAY ========== -->
+<div id="quotaOverlay" class="quota-overlay hidden">
+    <div class="quota-card">
+        <div class="quota-icon">⚡</div>
+        <div class="quota-title">API Quota Exhausted</div>
+        <div class="quota-desc">
+            The Gemini AI free-tier daily limit of <strong>20 requests</strong> has been reached.
+            Your interview progress and answers are <strong>safely saved</strong> — nothing is lost.
+        </div>
+
+        <div class="quota-countdown-wrap">
+            <div class="quota-countdown-label">⏱ Auto-retry in</div>
+            <div class="quota-countdown-timer" id="quotaTimer">00:60</div>
+            <div class="quota-progress-bg">
+                <div class="quota-progress-fill" id="quotaProgressFill" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <div style="font-size:11.5px; color: var(--text-dim); margin-bottom: 20px; line-height:1.6;">
+            💡 <strong style="color:var(--text-muted)">Tip:</strong> Upgrade to a paid Gemini API key for unlimited requests, or wait for the quota to reset.
+        </div>
+
+        <div class="quota-actions">
+            <button class="btn-quota-retry" id="quotaRetryBtn" disabled>
+                <i class="fas fa-redo"></i> Retry Now
+            </button>
+            <button class="btn-quota-dismiss" id="quotaDismissBtn">
+                Dismiss
+            </button>
+        </div>
     </div>
+</div>
 
-    <script src="index.js"></script>
+<script src="index.js"></script>
 </body>
-
 </html>
